@@ -1,44 +1,28 @@
 <?php
 ob_start();
 session_start();
-
 if (isset($_SESSION['user']) != "") {
-    header("Location: index.php");
+    header("Location: ../index.php");
 }
-include_once 'dbconnect.php';
-
+include_once '../engine_room/dbconnect.php';
 if (isset($_POST['signup'])) {
-
     $uname = trim($_POST['uname']); // get posted data and remove whitespace
     $email = trim($_POST['email']);
     $upass = trim($_POST['pass']);
-
-    // hash password with SHA256;
-    $password = hash('sha256', $upass);
-
-    // check email exist or not
-    $stmt = $conn->prepare("SELECT email FROM users WHERE email=?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $stmt->close();
-
-    $count = $result->num_rows;
-
+    $password = hash('sha256', $upass);// hash password with SHA256;
+    $select = $db->prepare("SELECT email FROM users WHERE email = :email");
+    $select->execute(array(':email' => $email));
+    $result = $select->fetch();
+    $count = $select->rowCount();
     if ($count == 0) { // if email is not found add user
-
-
-        $stmts = $conn->prepare("INSERT INTO users(username,email,password) VALUES(?, ?, ?)");
-        $stmts->bind_param("sss", $uname, $email, $password);
-        $res = $stmts->execute();//get result
-        $stmts->close();
-
-        $user_id = mysqli_insert_id($conn);
+        $insert = $db->prepare('INSERT INTO `users` (`username`, `email`, `pass_word`) VALUES (?, ?, ?)');
+        $insert->execute(["$uname", "$email", "$password"]);
+        $user_id = $db->lastInsertId();
         if ($user_id > 0) {
             $_SESSION['user'] = $user_id; // set session and redirect to index page
             if (isset($_SESSION['user'])) {
                 print_r($_SESSION);
-                header("Location: index.php");
+                header("Location: ../index.php");
                 exit;
             }
 
@@ -55,25 +39,21 @@ if (isset($_POST['signup'])) {
 }
 ?>
 <!DOCTYPE html>
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Registration</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="assets/css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href="../assets/css/style.css" type="text/css"/>
 </head>
 <body>
-
 <div class="container">
-
     <div id="login-form">
         <form method="post" autocomplete="off">
-
             <div class="col-md-12">
-
                 <div class="form-group">
                     <h2 class="">Register for our Website</h2>
                 </div>
-
                 <div class="form-group">
                     <hr/>
                 </div>
@@ -127,7 +107,7 @@ if (isset($_POST['signup'])) {
                 </div>
 
                 <div class="form-group">
-                    <a href="login.php" type="button" class="btn btn-block btn-success" name="btn-login">Login</a>
+                    <a href="../login/index.php" type="button" class="btn btn-block btn-success" name="btn-login">Login</a>
                 </div>
 
             </div>
@@ -136,9 +116,8 @@ if (isset($_POST['signup'])) {
     </div>
 
 </div>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="assets/js/tos.js"></script>
-
+<script src="../assets/js/jquery.js"></script>
+<script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../assets/js/tos.js"></script>
 </body>
 </html>

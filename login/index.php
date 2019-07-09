@@ -1,45 +1,41 @@
 <?php
 ob_start();
 session_start();
-require_once 'dbconnect.php';
-
+require_once '../engine_room/dbconnect.php';
 // if session is set direct to index
 if (isset($_SESSION['user'])) {
-    header("Location: index.php");
+    header("Location: ../index.php");
     exit;
 }
-
 if (isset($_POST['btn-login'])) {
     $email = $_POST['email'];
     $upass = $_POST['pass'];
-
     $password = hash('sha256', $upass); // password hashing using SHA256
-    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE email= ?");
-    $stmt->bind_param("s", $email);
-    /* execute query */
-    $stmt->execute();
-    //get result
-    $res = $stmt->get_result();
-    $stmt->close();
+    $select = $db->prepare("SELECT id, username, pass_word FROM users WHERE email = :email");
+    $select->execute(array(':email' => $email));
+    $result = $select->fetch();
+    $row_count = $select->rowCount();
 
-    $row = mysqli_fetch_array($res, MYSQLI_ASSOC);
-
-    $count = $res->num_rows;
-    if ($count == 1 && $row['password'] == $password) {
-        $_SESSION['user'] = $row['id'];
-        header("Location: index.php");
-    } elseif ($count == 1) {
+    if ($row_count > 0) {
+        echo "Row has been found";
+    } else {
+        echo "No row in DB";
+    }
+    if ($row_count == 1 && $result['pass_word'] == $password) {
+        $_SESSION['user'] = $result['id'];
+        header("Location: ../index.php");
+    } elseif ($row_count == 1) {
         $errMSG = "Bad password";
     } else $errMSG = "User not found";
 }
 ?>
-
 <!DOCTYPE html>
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Login</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="assets/css/style.css" type="text/css"/>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" type="text/css"/>
+    <link rel="stylesheet" href=".../assets/css/style.css" type="text/css"/>
 </head>
 <body>
 
@@ -75,7 +71,7 @@ if (isset($_POST['btn-login'])) {
                 <div class="form-group">
                     <div class="input-group">
                         <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
-                        <input type="email" name="email" class="form-control" placeholder="Email" required/>
+                        <input type="text" name="email" class="form-control" placeholder="Email"/>
                     </div>
                 </div>
 
@@ -99,7 +95,7 @@ if (isset($_POST['btn-login'])) {
                 </div>
 
                 <div class="form-group">
-                    <a href="register.php" type="button" class="btn btn-block btn-danger"
+                    <a href="../register/index.php" type="button" class="btn btn-block btn-danger"
                        name="btn-login">Register</a>
                 </div>
 
@@ -109,7 +105,7 @@ if (isset($_POST['btn-login'])) {
     </div>
 
 </div>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script type="text/javascript" src="assets/js/bootstrap.min.js"></script>
+<script src="../assets/js/jquery.js"></script>
+<script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
 </body>
 </html>

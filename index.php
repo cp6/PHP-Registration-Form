@@ -1,16 +1,21 @@
 <?php
 ob_start();
 session_start();
-require_once 'dbconnect.php';
-
+require_once 'engine_room/dbconnect.php';
 if (!isset($_SESSION['user'])) {
-    header("Location: login.php");
+    header("Location: login/index.php");
     exit;
 }
-// select logged in users detail
-$res = $conn->query("SELECT * FROM users WHERE id=" . $_SESSION['user']);
-$userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
+$select = $db->prepare("SELECT `username`, `type`, `email` FROM users WHERE id = :id");
+$select->execute(array(':id' => $_SESSION['user']));
+$userRow = $select->fetch();
 
+
+if ($userRow['type'] == 1) {
+    echo 'Admin account';
+} else {
+    echo "Normal user";
+}
 ?>
 <!DOCTYPE html>
 <head>
@@ -46,11 +51,12 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                        aria-expanded="false">
                         <span
-                            class="glyphicon glyphicon-user"></span>&nbsp;Logged
+                                class="glyphicon glyphicon-user"></span>&nbsp;Logged
                         in: <?php echo $userRow['email']; ?>
                         &nbsp;<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="logout.php?logout"><span class="glyphicon glyphicon-log-out"></span>&nbsp;Logout</a>
+                        <li><a href="logout/index.php?logout"><span
+                                        class="glyphicon glyphicon-log-out"></span>&nbsp;Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -58,8 +64,6 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
         </div>
     </div>
 </nav>
-
-
 
 
 <div class="container">
@@ -82,15 +86,10 @@ $userRow = mysqli_fetch_array($res, MYSQLI_ASSOC);
             <p>The following snippet of text is <strong>rendered as bold text</strong>.</p>
             <p>The following snippet of text is <em>rendered as italicized text</em>.</p>
             <p>An abbreviation of the word attribute is <abbr title="attribute">attr</abbr>.</p>
-
         </div>
-
-
     </div>
 </div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="assets/js/jquery.js"></script>
 <script src="assets/js/bootstrap.min.js"></script>
-
 </body>
 </html>
