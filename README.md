@@ -15,7 +15,7 @@ Includes PHP PDO MySQL Prepared Statements and password encryption using passwor
 3. Run `db.sql` on your chosen database.
 4. Open `engine_room/defines.php` Edit in your Database connection details, Website name and footer text.
 
-##TODO:
+## TODO:
 
 1. Code comments.
 2. Styling.
