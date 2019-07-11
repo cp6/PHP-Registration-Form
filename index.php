@@ -1,80 +1,48 @@
 <?php
 ob_start();
 session_start();
-require_once 'engine_room/dbconnect.php';
+require_once 'engine_room/defines.php';
 if (!isset($_SESSION['user'])) {
     header("Location: login/index.php");
     exit;
 }
 $select = $db->prepare("SELECT `username`, `type`, `email` FROM users WHERE id = :id");
-$select->execute(array(':id' => $_SESSION['user']));
-$userRow = $select->fetch();
-
-
-if ($userRow['type'] == 1) {
-    echo 'Admin account';
-} else {
-    echo "Normal user";
+$userRow = $select->fetch($select->execute(array(':id' => $_SESSION['user'])));
+if ($userRow['type'] == 1) {//admin
+    header("Location: panel/index.php");
+    exit;
 }
 ?>
 <!DOCTYPE html>
+<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Hello,<?php echo $userRow['email']; ?></title>
+    <title>Hello, <?php echo $userRow['email']; ?> - <?php echo $website_name; ?></title>
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" type="text/css"/>
-    <link rel="stylesheet" href="assets/css/index.css" type="text/css"/>
+    <link rel="stylesheet" href="assets/css/style.css" type="text/css"/>
 </head>
 <body>
-
 <!-- Navigation Bar-->
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                    aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">Website Name</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="#">First Link</a></li>
-                <li><a href="#">Second Link</a></li>
-                <li><a href="#">Third Link</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">
-                        <span
-                                class="glyphicon glyphicon-user"></span>&nbsp;Logged
-                        in: <?php echo $userRow['email']; ?>
-                        &nbsp;<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="logout/index.php?logout"><span
-                                        class="glyphicon glyphicon-log-out"></span>&nbsp;Logout</a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+<nav class="navbar navbar-expand-sm bg-light navbar-light justify-content-center">
+    <a class="navbar-brand" href="#"><?php echo $website_name; ?></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="logout/index.php">Logout</a>
+            </li>
+        </ul>
     </div>
 </nav>
-
-
 <div class="container">
-    <!-- Jumbotron-->
     <div class="jumbotron">
         <h1>Hello, <?php echo $userRow['username']; ?></h1>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque at auctor est, in convallis eros. Nulla
             facilisi. Donec ipsum nulla, hendrerit nec mauris vitae, lobortis egestas tortor. </p>
         <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more</a></p>
     </div>
-
     <div class="row">
         <div class="col-lg-12">
             <h2>Example body text</h2>
