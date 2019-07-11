@@ -4,9 +4,9 @@ This is a secure login & registration form using PHP, MySQL and Bootstrap 4.3.1
 
 Includes PHP PDO MySQL Prepared Statements and password encryption using password hashing.
 
-![Login page](https://github.com/cp6/PHP-Registration-Form/screenshots/login.png)
-![Register page](https://github.com/cp6/PHP-Registration-Form/screenshots/register.png)
-![Admin panel](https://github.com/cp6/PHP-Registration-Form/screenshots/admin_panel.png)
+![Login page](https://github.com/cp6/PHP-Registration-Form/blob/master/screenshots/login.png)
+![Register page](https://github.com/cp6/PHP-Registration-Form/blob/master/screenshots/register.png)
+![Admin panel](https://github.com/cp6/PHP-Registration-Form/blob/master/screenshots/admin_panel.png)
 
 ## Installation
 
