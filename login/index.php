@@ -9,19 +9,29 @@ if (isset($_SESSION['user'])) {
 if (isset($_POST['btn-login'])) {
     $email = $_POST['email'];
     $upass = $_POST['pass'];
-    $select = $db->prepare("SELECT `id`, `username`, `pass_word`, `created`, `verified` FROM `users` WHERE `email` = :email");
+    $select = $db->prepare("SELECT `id`, `username`, `pass_word`, `created`, `verified`, `type` FROM `users` WHERE `email` = :email");
     $select->execute(array(':email' => $email));
     $result = $select->fetch();
     $row_count = $select->rowCount();
     if ($row_count == 1 && password_verify($upass, $result['pass_word'])) {
         $_SESSION['user'] = $result['id'];
-        if ($result['verified'] == 1){
-            header("Location: ../index.php");
+        if ($result['verified'] == 1) {
+            if ($result['type'] == 4) {
+                $errMSG = "Your account is suspended";
+            } else {
+                $update = $db->prepare("UPDATE `login_count` SET `count` = `count` + 1 WHERE `uid` = :id");
+                $update->execute(array(':id' => $result['id']));
+                $insert = $db->prepare('INSERT IGNORE INTO `login_attempts` (`uid`, `result`, `ip`) VALUES (?, ?, ?)');
+                $insert->execute([$result['id'], "1", $_SERVER['REMOTE_ADDR']]);
+                header("Location: ../index.php");
+            }
         } else {
             $errMSG = "You are not verified yet";
         }
     } elseif ($row_count == 1) {
         $errMSG = "Bad password";
+        $insert = $db->prepare('INSERT IGNORE INTO `login_attempts` (`uid`, `result`, `ip`) VALUES (?, ?, ?)');
+        $insert->execute([$result['id'], "0", $_SERVER['REMOTE_ADDR']]);
     } else $errMSG = "User not found";
 }
 ?>
@@ -45,7 +55,7 @@ if (isset($_POST['btn-login'])) {
                     ?>
                     <div class="form-group">
                         <div class="alert alert-danger">
-                            <span class="glyphicon glyphicon-info-sign"></span> <?php echo $errMSG; ?>
+                            <?php echo $errMSG; ?>
                         </div>
                     </div>
                     <?php
@@ -66,13 +76,13 @@ if (isset($_POST['btn-login'])) {
                     <button type="submit" class="btn btn-block btn-primary" name="btn-login">Login</button>
                 </div>
                 <div class="form-group btn-row">
-                    <a href="../register/index.php" type="button" class="btn btn-block btn-warning">Register</a>
+                    <a href="../register/index.php" class="btn btn-block btn-warning">Register</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
-<script src="../assets/js/jquery.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.js"></script>
 <script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
 </body>
 </html>

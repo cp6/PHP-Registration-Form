@@ -1,26 +1,33 @@
 <?php
 ob_start();
 session_start();
+session_destroy();
+unset($_SESSION['user']);
 if (isset($_SESSION['user']) != "") {
     header("Location: ../index.php");
 }
 include_once '../engine_room/defines.php';
 if (isset($_POST['signup'])) {
-    $uname = trim($_POST['uname']); // get posted data and remove whitespace
+    $uname = trim($_POST['uname']);// get posted data and remove whitespace
     $email = trim($_POST['email']);
     $upass = trim($_POST['pass']);
-    //$password = hash('sha256', $upass);// hash password with SHA256;
     $password = password_hash($upass, PASSWORD_DEFAULT);
     $select = $db->prepare("SELECT `email` FROM `users` WHERE `email` = :email");
     $select->execute(array(':email' => $email));
     $result = $select->fetch();
     $count = $select->rowCount();
-    if ($count == 0) { // if email is not found add user
+    if ($count == 0) {// if email is not found add user
         $insert = $db->prepare('INSERT INTO `users` (`username`, `email`, `pass_word`) VALUES (?, ?, ?)');
         $insert->execute(["$uname", "$email", "$password"]);
         $user_id = $db->lastInsertId();
+        $insert2 = $db->prepare('INSERT INTO `login_count` (`id`) VALUES (?)');
+        $insert2->execute(["$user_id"]);
+        if ($verify_new_users_method == 0){
+            $update = $db->prepare("UPDATE `users` SET `verified` = 1 WHERE `id` = :id");
+            $update->execute(array(':id' => $user_id));
+        }
         if ($user_id > 0) {
-            $_SESSION['user'] = $user_id; // set session and redirect to index page
+            $_SESSION['user'] = $user_id;// set session and redirect to index page
             if (isset($_SESSION['user'])) {
                 print_r($_SESSION);
                 header("Location: ../index.php");
@@ -37,8 +44,9 @@ if (isset($_POST['signup'])) {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Registration - <?php echo $website_name;?></title>
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css" type="text/css"/>
@@ -52,11 +60,10 @@ if (isset($_POST['signup'])) {
             <form method="post" autocomplete="off">
                 <?php
                 if (isset($errMSG)) {
-
                     ?>
                     <div class="form-group">
                         <div class="alert alert-<?php echo ($errTyp == "success") ? "success" : $errTyp; ?>">
-                            <span class="glyphicon glyphicon-info-sign"></span> <?php echo $errMSG; ?>
+                            <?php echo $errMSG; ?>
                         </div>
                     </div>
                     <?php
@@ -87,7 +94,7 @@ if (isset($_POST['signup'])) {
                     <button type="submit" class="btn btn-block btn-primary" name="signup" id="reg">Register</button>
                 </div>
                 <div class="form-group btn-row">
-                    <a href="../login/index.php" type="button" class="btn btn-block btn-success" name="btn-login">Go to login</a>
+                    <a href="../login/index.php" class="btn btn-block btn-success" name="btn-login">Go to login</a>
                 </div>
 
             </div>
@@ -95,7 +102,7 @@ if (isset($_POST['signup'])) {
         </form>
     </div>
 </div>
-<script src="../assets/js/jquery.js"></script>
+<script type="text/javascript" src="../assets/js/jquery.js"></script>
 <script type="text/javascript" src="../assets/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../assets/js/tos.js"></script>
 </body>

@@ -16,31 +16,11 @@ function user_type_to_string($type)
         return "Admin";
     } elseif ($type == 2) {
         return "Dev";
+    } elseif ($type == 3) {
+        return "Mod";
+    } elseif ($type == 4) {
+        return "Suspended";
     } else {
-        return "Unknown: $type";
+        return "Unknown:$type";
     }
-}
-
-function total_users_count()
-{
-    global $db;
-    $select = $db->prepare("SELECT COUNT(*) as the_count FROM `users`;");
-    $row = $select->fetch($select->execute());
-    return $row['the_count'];
-}
-
-function total_verified_users()
-{
-    global $db;
-    $select = $db->prepare("SELECT COUNT(*) as the_count FROM `users` WHERE `verified` = 1;");
-    $row = $select->fetch($select->execute());
-    return $row['the_count'];
-}
-
-function total_unverified_users()
-{
-    global $db;
-    $select = $db->prepare("SELECT COUNT(*) as the_count FROM `users` WHERE `verified` = 0;");
-    $row = $select->fetch($select->execute());
-    return $row['the_count'];
 }
